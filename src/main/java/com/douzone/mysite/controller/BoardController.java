@@ -1,6 +1,5 @@
 package com.douzone.mysite.controller;
 
-import java.util.List;
 import java.util.Map;
 
 import javax.servlet.http.HttpSession;
@@ -9,170 +8,152 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.douzone.mysite.service.BoardService;
+import com.douzone.mysite.util.WebUtil;
 import com.douzone.mysite.vo.BoardVo;
-import com.douzone.mysite.vo.CommentVo;
 import com.douzone.mysite.vo.UserVo;
 
 
 @Controller
-@RequestMapping("/board")
+@RequestMapping( "/board" )
 public class BoardController {
-
 	@Autowired
 	private BoardService boardService;
-	
-	@RequestMapping({"","/list","/select"})
-	public String list(@RequestParam(value="page",required=false) String page,
-			@RequestParam(value="start",required=false) String start,Model model) {
+
+	@RequestMapping("")
+	public String index(
+		@RequestParam( value="p", required=true, defaultValue="1") Integer page,
+		@RequestParam( value="kwd", required=true, defaultValue="") String keyword,
+		Model model ) {
 		
-		if(page==null)
-			page="1";
+		Map<String, Object> map = boardService.getMessageList( page, keyword );
+		model.addAttribute( "map", map );
 		
-		Map<String,Object> map =boardService.list(page,start);
-		
-		int bCnt= (int)map.get("pagerTotalPageCount");
-		int bStart=(int)map.get("bStart");
-		int bEnd=(int)map.get("bEnd");
-		List <BoardVo> list = (List)map.get("list");
-		
-		model.addAttribute("list",list);
-		model.addAttribute("bStart",bStart);
-		model.addAttribute("bEnd",bEnd);
-		model.addAttribute("search","false");
-		model.addAttribute("page",page);
 		return "board/list";
 	}
 	
-
-	@RequestMapping("/search")
-	public String searchList(@RequestParam(value="page",required=false) String page,
-			@RequestParam(value="kwd",required=false) String text,
-			@RequestParam(value="search-value",required=false) String searchValue,
-			@RequestParam(value="start",required=false) String start,Model model) {
-		
-		if(page==null)
-			page="1";
-		
-		Map<String,Object> map =boardService.searchList(page, searchValue, text,start);
-		
-		int bCnt= (int)map.get("pagerTotalPageCount");
-		int bStart=(int)map.get("bStart");
-		int bEnd=(int)map.get("bEnd");
-		List <BoardVo> list = (List)map.get("list");
-		
-		model.addAttribute("list",list);
-		model.addAttribute("bStart",bStart);
-		model.addAttribute("bEnd",bEnd);
-		model.addAttribute("search","true");
-		model.addAttribute("page",page);
-		model.addAttribute("text",text);
-		model.addAttribute("searchValue",searchValue);
-		return "board/list";
-	}
-
-	@RequestMapping("/view")
-	public String view(
-			@RequestParam(value="page",required=false) String page,
-			@RequestParam(value="no",required=false) String boardNo,
-			@RequestParam(value="userNo",required=false) String userNo,
-			@RequestParam(value="c",required=false) String boolcomment,
-			@RequestParam(value="start",required=false) String start,Model model) {
-		
-		
-		Map<String,Object> map =boardService.view(page, boardNo, boolcomment,start);
-		
-		model.addAttribute("list",map.get("list"));
-		model.addAttribute("userNo",userNo);
-		model.addAttribute("boardVo",map.get("boardVo"));
-		model.addAttribute("bEnd",map.get("bEnd"));
-		model.addAttribute("bStart", map.get("bStart"));
-		model.addAttribute("page",map.get("page"));
+	@RequestMapping( "/view/{no}" )
+	public String view( @PathVariable( "no" ) Long no, Model model ) {
+		BoardVo boardVo = boardService.getMessage( no );
+		model.addAttribute( "boardVo", boardVo );
 		return "board/view";
 	}
-	@RequestMapping(value="/write",method=RequestMethod.GET)
-	public String write() {
-		return "board/write";
-	}
-	@RequestMapping(value="/write",method=RequestMethod.POST)
-	public String write(HttpSession session,@ModelAttribute BoardVo boardVo) {
-		UserVo authUser = (UserVo)session.getAttribute("authuser");
-		if(authUser ==null)
-		{
-			System.out.println("error 발생 해야함");
-			return "";
-		}
-		boardService.write(boardVo, authUser.getNo());
-		
-		return "redirect:/board/";
-	}
+	
+	@RequestMapping( "/delete/{no}" )
+	public String delete(
+		HttpSession session,
+		@PathVariable( "no" ) Long boardNo,
+		@RequestParam( value="p", required=true, defaultValue="1") Integer page,
+		@RequestParam( value="kwd", required=true, defaultValue="") String keyword ) {
 
-	@RequestMapping(value="/delete",method=RequestMethod.GET)
-	public String delete(@RequestParam("no") String no)
-	{
-		boardService.delete(no);
-		return "redirect:/board/";
+		UserVo authUser = (UserVo)session.getAttribute("authUser");
+
+		/* 접근제어 */
+		if(null == authUser) {
+			return "redirect:/";
+		}
+		
+		boardService.deleteMessage( boardNo, authUser.getNo() );
+		return "redirect:/board?p=" + page + "&kwd=" + WebUtil.encodeURL( keyword, "UTF-8" );
 	}
 	
-	@RequestMapping(value="/modify",method=RequestMethod.GET)
-	public String modify(@RequestParam("no") String no,Model model)
-	{
-		model.addAttribute("boardVo",boardService.modifyShow(no));
+	@RequestMapping( value="/modify/{no}" )	
+	public String modify(
+		HttpSession session,
+		@PathVariable( "no" ) Long no,
+		Model model) {
+
+		UserVo authUser = (UserVo)session.getAttribute("authUser");
+
+		/* 접근제어 */
+		if(null == authUser) {
+			return "redirect:/";
+		}
+		
+		BoardVo boardVo = boardService.getMessage(no, authUser.getNo() );
+		model.addAttribute( "boardVo", boardVo );
 		return "board/modify";
 	}
-	@RequestMapping(value="/modify",method=RequestMethod.POST)
-	public String modify(@ModelAttribute BoardVo boardVo,Model model)
-	{
+
+	@RequestMapping( value="/modify", method=RequestMethod.POST )	
+	public String modify(
+		HttpSession session,
+		@ModelAttribute BoardVo boardVo,
+		@RequestParam( value="p", required=true, defaultValue="1") Integer page,
+		@RequestParam( value="kwd", required=true, defaultValue="") String keyword ) {
+
+		UserVo authUser = (UserVo)session.getAttribute("authUser");
+
+		/* 접근제어 */
+		if(null == authUser) {
+			return "redirect:/";
+		}
 		
-		boardService.modify(boardVo);
-		return "redirect:/board/";
+		boardVo.setUserNo( authUser.getNo() );
+		boardService.modifyMessage( boardVo );
+		return "redirect:/board/view/" + boardVo.getNo() + 
+				"?p=" + page + 
+				"&kwd=" + WebUtil.encodeURL( keyword, "UTF-8" );
 	}
 	
-	@RequestMapping(value="/reply",method=RequestMethod.GET)
-	public String reply()
-	{
+	@RequestMapping( value="/write", method=RequestMethod.GET )	
+	public String write(HttpSession session) {
+		/* 접근제어 */
+		if(null == session.getAttribute("authUser")) {
+			return "redirect:/";
+		}
+		
+		return "board/write";
+	}
+
+	@RequestMapping( value="/write", method=RequestMethod.POST )	
+	public String write(
+		HttpSession session,
+		@ModelAttribute BoardVo boardVo,
+		@RequestParam( value="p", required=true, defaultValue="1") Integer page,
+		@RequestParam( value="kwd", required=true, defaultValue="") String keyword ) {
+
+		UserVo authUser = (UserVo)session.getAttribute("authUser");
+
+		/* 접근제어 */
+		if(null == authUser) {
+			return "redirect:/";
+		}
+		
+		boardVo.setUserNo( authUser.getNo() );
+		
+		if( boardVo.getGroupNo() != null ) {
+			boardService.increaseGroupOrderNo( boardVo );
+		}
+		boardService.addMessage( boardVo );
+		
+		return	( boardVo.getGroupNo() != null ) ?
+				"redirect:/board?p=" + page + "&kwd=" + WebUtil.encodeURL( keyword, "UTF-8" ) :
+				"redirect:/board";
+	}
+
+	@RequestMapping( value="/reply/{no}" )	
+	public String reply(
+		HttpSession session,
+		@PathVariable( "no" ) Long no,
+		Model model) {
+
+		/* 접근제어 */
+		if(null == session.getAttribute("authUser")) {
+			return "redirect:/";
+		}
+
+		BoardVo boardVo = boardService.getMessage( no );
+		boardVo.setOrderNo( boardVo.getOrderNo() + 1 );
+		boardVo.setDepth( boardVo.getDepth() + 1 );
+		
+		model.addAttribute( "boardVo", boardVo );
 		
 		return "board/reply";
-	}
-	@RequestMapping(value="/reply",method=RequestMethod.POST)
-	public String reply(HttpSession session,@ModelAttribute BoardVo boardVo)
-	{
-		UserVo authUser = (UserVo)session.getAttribute("authuser");
-		if(authUser ==null)
-		{
-			System.out.println("error 발생 해야함");
-			return "";
-		}
-		boardService.reply(boardVo,authUser.getNo());
-		return "redirect:/board/";
-	}
-	
-	@RequestMapping(value="/comment",method=RequestMethod.POST)
-	public String comment(HttpSession session,
-			@RequestParam(value="contents",required=false) String contents,
-			@RequestParam(value="boardNo",required=false) Long boardNo,Model model)
-	{
-		UserVo authUser = (UserVo)session.getAttribute("authuser");
-		if(authUser ==null)
-		{
-			System.out.println("error 발생 해야함");
-			return "";
-		}
-		boardService.comment(contents, authUser.getNo(), boardNo);
-		model.addAttribute("no",boardNo);
-		return "redirect:/board/view";
-	}
-	@RequestMapping(value="/commentdelete",method=RequestMethod.GET)
-	public String commentDelete(
-			@RequestParam(value="boardNo",required=false) String boardNo,
-			@RequestParam(value="no",required=false) String commentNo,Model model)
-	{
-		boardService.commentDelete(commentNo);
-		model.addAttribute("no",boardNo);
-		return "redirect:/board/view";
-	}
+	}	
 }

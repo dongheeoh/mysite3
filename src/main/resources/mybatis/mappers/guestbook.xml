@@ -3,8 +3,37 @@
 
 <mapper namespace="guestbook">
 	<insert id="insert" parameterType="guestbookvo">
+	<selectKey keyProperty="no" resultType="long" order="AFTER" >
+		<![CDATA[
+		select last_insert_id();
+		]]>
+	</selectKey>
 		<![CDATA[
 			insert into guestbook values (null, #{name}, #{password}, #{text}, now())
 		]]>
 	</insert>
+	
+	<select id="getList" resultType="guestbookvo">
+		<![CDATA[
+		select no, name, pasword, message as text, reg_date as regDate from guestbook order by no desc
+		]]>
+	</select>
+	
+	<select id="getByPage"   parameterType="int" resultType="guestbookvo">
+		<![CDATA[
+			select no, name, date_format(reg_date, '%Y-%m-%d %h:%i:%s')as regDate, message as text from guestbook order by reg_date desc limit #{page}, 5  
+		]]>
+	</select>
+	
+	<select id="getByNoval" parameterType="long" resultType="guestbookvo">
+		<![CDATA[
+			select no, name, date_format(reg_date, '%Y-%m-%d %h:%i:%s')as regDate, message as text from guestbook where no =#{no}
+		]]>
+	</select>
+	
+	<delete id="delete" parameterType="guestbookvo" >
+		<![CDATA[
+			delete from guestbook where no =#{no} and pasword =#{password}
+		]]>
+	</delete>
 </mapper>

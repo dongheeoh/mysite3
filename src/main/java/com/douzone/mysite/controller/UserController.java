@@ -1,7 +1,5 @@
 package com.douzone.mysite.controller;
 
-import javax.servlet.http.HttpSession;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -11,92 +9,61 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.douzone.mysite.service.UserService;
 import com.douzone.mysite.vo.UserVo;
+import com.douzone.security.Auth;
+import com.douzone.security.AuthUser;
 
 @Controller
 @RequestMapping("/user")
 public class UserController {
 	
 	@Autowired
-	private UserService userService ;
+	private UserService userService;
 	
+	@RequestMapping( value="/join", method=RequestMethod.GET )
+	public String join(){
+		return "user/join";
+	}
 	
-		@RequestMapping(value="/join", method=RequestMethod.GET)
-		public String join() {
-			return "/user/join";
-		}
+	@RequestMapping( value="/join", method=RequestMethod.POST )
+	public String join( @ModelAttribute UserVo userVo ){
+		userService.join( userVo );
+		return "redirect:/user/joinsuccess";
+	}
+	
+	@RequestMapping( value="/login", method=RequestMethod.GET )
+	public String login() {
+		return "user/login";
+	}
+	
 
-		@RequestMapping(value="/join", method=RequestMethod.POST)
-		public String join(@ModelAttribute UserVo userVo) {
-			userService.join(userVo);//이게 비즈니스지
-			return "redirect:/user/joinsuccess";
-		}
+	@RequestMapping( "/joinsuccess" )
+	public String joinsuccess(){
+		return "user/joinsuccess";
+	}
 	
+	@Auth
+	@RequestMapping( value="/modify", method=RequestMethod.GET )
+	public String modify(@AuthUser UserVo authUser, Model model ){
+		System.out.println(authUser);
+		UserVo userVo = userService.getUser( authUser.getNo() );
+		model.addAttribute( "userVo", userVo );
+		System.out.println(userVo);
+		return "user/modify";
+	}
+	
+	@Auth
+	@RequestMapping( value="/modify", method=RequestMethod.POST )
+	public String modify( @AuthUser UserVo authUser, @ModelAttribute UserVo userVo ){
 		
-		@RequestMapping("/joinsuccess")
-		public String joinSuccess() {
-			return "/user/joinsuccess";
-		}
-	
-		@RequestMapping(value="/login", method=RequestMethod.GET)
-		public String login(HttpSession session) { //파라미터임 즉 getsession해서 던져준거임
-			//로그인한사람은 들어오면안됨
-			UserVo authUser = (UserVo)session.getAttribute("authuser");
-			if(authUser!= null){		
-				return "redirect:/main";
-			}
-			return "/user/login";
-		}
-	
-		@RequestMapping(value="/login", method=RequestMethod.POST)
-		public String login(HttpSession session, Model model,@ModelAttribute UserVo userVo) {
-
-			//로그인한사람은 보내면안됨
-			UserVo authUser = (UserVo)session.getAttribute("authuser");
-			if(authUser!= null){		
-				return "redirect:/main";
-			}
-			
-			authUser = userService.login(userVo);		
-			
-			if(authUser == null){		
-				model.addAttribute("result",  "fail");
-				return "redirect:/user/login";
-			}
-			
-			session.setAttribute("authuser", authUser); //세션에 등록
-			return "redirect:/main";
-		}
-	
-		@RequestMapping(value="/logout", method=RequestMethod.GET)
-		public String logout(HttpSession session) {
-			userService.logout(session);
-			return "redirect:/main";
-		}
-	
-		@RequestMapping(value="/modify", method=RequestMethod.GET)
-		public String modify(HttpSession session, Model model) {
-			
-			UserVo authUser = (UserVo)session.getAttribute("authuser");
-			if(authUser == null){		
-				return "redirect:/main";
-			}
-			authUser = userService.modifyform(authUser.getNo());
-			model.addAttribute("vo", authUser);
-			return "user/modify";
-		}
+		System.out.println(authUser);
+		System.out.println(userVo);
 		
-		@RequestMapping(value="/modify", method=RequestMethod.POST)
-		public String modify(HttpSession session, UserVo uservo) {
-			
-			UserVo authUser = (UserVo)session.getAttribute("authuser");
-			if(authUser == null){		
-				return "redirect:/main";
-			}
-			uservo.setNo(authUser.getNo());
-			userService.modify(uservo);
-			
-			authUser.setName(uservo.getName());		//세션수정
-			session.setAttribute("authuser", authUser); 
-			return "redirect:/main";
-		}
+		userVo.setNo( authUser.getNo() );
+		userService.modifyUser( userVo );
+		
+		//session의 authUser 변경
+		authUser.setName(userVo.getName());
+		
+		return "redirect:/user/modify?result=success";
+	}
 }

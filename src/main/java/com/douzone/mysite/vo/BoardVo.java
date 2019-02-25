@@ -1,45 +1,21 @@
 package com.douzone.mysite.vo;
 
 public class BoardVo {
-	private long no;
+	
+	private Long no; 
 	private String title;
 	private String contents;
-	private String writeDate;
-	private int hit;
-	private int gNo;
-	private int oNo;
-	private int depth;
-	private String fileName;
-	public String getFileName() {
-		return fileName;
-	}
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-	public UserVo getUserVo() {
-		return userVo;
-	}
-	public void setUserVo(UserVo userVo) {
-		this.userVo = userVo;
-	}
-	private UserVo userVo;
-
-	@Override
-	public String toString() {
-		return "BoardVo [no=" + no + ", title=" + title + ", contents=" + contents + ", writeDate=" + writeDate
-				+ ", hit=" + hit + ", gNo=" + gNo + ", oNo=" + oNo + ", depth=" + depth + ", fileName=" + fileName
-				+ ", userVo=" + userVo + "]";
-	}
-	public UserVo getuserVo() {
-		return userVo;
-	}
-	public void setuserVo(UserVo userVo) {
-		this.userVo = userVo;
-	}
-	public long getNo() {
+	private String regdate;
+	private Integer hit;
+	private Integer groupNo;
+	private Integer orderNo;
+	private Integer depth;
+	private Long userNo;
+	private String userName;
+	public Long getNo() {
 		return no;
 	}
-	public void setNo(long no) {
+	public void setNo(Long no) {
 		this.no = no;
 	}
 	public String getTitle() {
@@ -54,36 +30,54 @@ public class BoardVo {
 	public void setContents(String contents) {
 		this.contents = contents;
 	}
-	public String getWriteDate() {
-		return writeDate;
+	public String getRegdate() {
+		return regdate;
 	}
-	public void setWriteDate(String writeDate) {
-		this.writeDate = writeDate;
+	public void setRegdate(String regdate) {
+		this.regdate = regdate;
 	}
-	public int getHit() {
+	public Integer getHit() {
 		return hit;
 	}
-	public void setHit(int hit) {
+	public void setHit(Integer hit) {
 		this.hit = hit;
 	}
-	public int getgNo() {
-		return gNo;
+	public Integer getGroupNo() {
+		return groupNo;
 	}
-	public void setgNo(int gNo) {
-		this.gNo = gNo;
+	public void setGroupNo(Integer groupNo) {
+		this.groupNo = groupNo;
 	}
-	public int getoNo() {
-		return oNo;
+	public Integer getOrderNo() {
+		return orderNo;
 	}
-	public void setoNo(int oNo) {
-		this.oNo = oNo;
+	public void setOrderNo(Integer orderNo) {
+		this.orderNo = orderNo;
 	}
-	public int getDepth() {
+	public Integer getDepth() {
 		return depth;
 	}
-	public void setDepth(int depth) {
+	public void setDepth(Integer depth) {
 		this.depth = depth;
 	}
+	public Long getUserNo() {
+		return userNo;
+	}
+	public void setUserNo(Long userNo) {
+		this.userNo = userNo;
+	}
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
+	@Override
+	public String toString() {
+		return "BoardVo [no=" + no + ", title=" + title + ", contents=" + contents + ", regdate=" + regdate + ", hit="
+				+ hit + ", groupNo=" + groupNo + ", orderNo=" + orderNo + ", depth=" + depth + ", userNo=" + userNo
+				+ ", userName=" + userName + "]";
+	}
 	
-
+	
 }

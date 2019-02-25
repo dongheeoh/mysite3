@@ -11,11 +11,11 @@
 </head>
 <body>
 	<div id="container">
-		<c:import url="/WEB-INF/views/includes/header.jsp"/>
+		<c:import url="/WEB-INF/views/includes/header.jsp" />
 		<div id="content">
 			<div id="board">
-				<form id="search_form" action="<c:url value='/' />board/search" method="post">
-					<input type="text" id="kwd" name="kwd" value="">
+				<form id="search_form" action="${pageContext.request.contextPath }/board" method="get">
+					<input type="text" id="kwd" name="kwd" value="${map.keyword }">
 					<input type="submit" value="찾기">
 				</form>
 				<table class="tbl-ex">
@@ -27,114 +27,74 @@
 						<th>작성일</th>
 						<th>&nbsp;</th>
 					</tr>
-						<c:set var="count" value="${fn:length(list) }"/>
-					<c:forEach items="${list}" var="vo" varStatus="status">			
-					<tr>
-						<td>[ ${count-status.index } ] </td>
-						<c:choose>
-						<c:when test="${vo.depth > 0}">
-						<td style="padding-left:${30*vo.depth }px"><img src="<c:url value='/' />assets/images/reply.png"/><a href="<c:url value='/' />board/view?no=${vo.no}&userNo=${vo.userVo.no}">${vo.title}</a></td>
-						</c:when>
-						<c:otherwise>
-						<td style="padding-left:${30*vo.depth }px"><a href="<c:url value='/' />board/view?no=${vo.no}&userNo=${vo.userVo.no}">${vo.title}</a></td>
-						</c:otherwise>
-						</c:choose>
-						<td>${vo.userVo.name}</td>
-						<td>${vo.hit}</td>
-						<td>${vo.writeDate}</td>
-						<c:choose>
-							<c:when test="${authuser.no==vo.userVo.no}">
-						<td><a href="<c:url value='/' />board/delete?no=${vo.no}" class="del"></a>
-						</td>
-							</c:when>
-							<c:otherwise>
-								<td>&nbsp;</td>
-							</c:otherwise>
-						</c:choose>
-						
-					</tr>
+					<c:forEach items="${map.list }"	var="vo" varStatus="status">			
+						<tr>
+							<td>${map.totalCount - (map.currentPage - 1)*map.listSize - status.index }</td>
+							<c:choose>
+								<c:when test="${vo.depth > 0 }">
+									<td class="left" style="padding-left:${20*vo.depth }px">
+										<img src="${pageContext.request.contextPath }/assets/images/reply.png">
+										<a href="${pageContext.request.contextPath }/board/view/${vo.no }?p=${map.currentPage }&kwd=${map.keyword }">${vo.title }</a>
+									</td>
+								</c:when>
+								<c:otherwise>
+									<td class="left">
+										<a href="${pageContext.request.contextPath }/board/view/${vo.no }?p=${map.currentPage }&kwd=${map.keyword }">${vo.title }</a>
+									</td>
+								</c:otherwise>
+							</c:choose>
+							<td>${vo.userName }</td>
+							<td>${vo.hit }</td>
+							<td>${vo.regdate }</td>
+							<td>
+								<c:choose>
+									<c:when test="${not empty authUser && authUser.no == vo.userNo }">
+										<a href="${pageContext.request.contextPath }/board/delete/${vo.no }?p=${map.currentPage }&kwd=${map.keyword }" class="del">삭제</a>
+									</c:when>
+									<c:otherwise>
+										&nbsp;
+									</c:otherwise>
+								</c:choose>
+							</td>
+						</tr>
 					</c:forEach>
 				</table>
-				
-				
-				
-				<c:choose>
-				<c:when test="${search==false}">
-				<!-- pager 추가 -->
 				<div class="pager">
 					<ul>
-						<c:set var="loop" value="true"/>
-						<c:set var="left" value="true"/>
-						<c:set var="j" value="1"/>
-						<c:forEach  begin="${bStart}" end="${bEnd}" step="1" var="i" >
-						<c:if test="${loop}">
-							<c:set var="j" value="${j+1}"/>
-						<c:if test="${bStart != 1 && left}">
-							<li id="pre"><a href="<c:url value='/' />board/select?page=${bStart-1}&start=${i-5}">◀ </a></li>
-							<c:set var="left" value="false"/>
+						<c:if test="${map.prevPage > 0 }" >
+							<li><a href="${map.pageContext.request.contextPath }/board?p=${map.prevPage }&kwd=${map.keyword }">◀</a></li>
 						</c:if>
-							<li id="${i}" class=""><a href="<c:url value='/' />board/select?page=${i}&start=${bStart}">${i} </a></li>
-						<c:if test="${j==6&&j!=bEnd+1}">
-							<li id="next"><a href="<c:url value='/' />board/select?page=${i+1}&start=${i+1}">▶</a></li>
-							<c:set var="loop" value="false"/>	
-						</c:if>
-						</c:if>
+						
+						<c:forEach begin="${map.beginPage }" end="${map.beginPage + map.listSize - 1 }" var="page">
+							<c:choose>
+								<c:when test="${map.endPage < page }">
+									<li>${page }</li>
+								</c:when> 
+								<c:when test="${map.currentPage == page }">
+									<li class="selected">${page }</li>
+								</c:when>
+								<c:otherwise> 
+									<li><a href="${pageContext.request.contextPath }/board?p=${page }&kwd=${map.keyword }">${page }</a></li>
+								</c:otherwise>
+							</c:choose>
 						</c:forEach>
+						
+						<c:if test="${nextPage > 0 }" >
+							<li><a href="${pageContext.request.contextPath }/board?p=${map.nextPage }&kwd=${map.keyword }">▶</a></li>
+						</c:if>	
 					</ul>
-				</div>	
-				<!-- pager 추가 -->
-				</c:when>
-				<c:otherwise>
-				<!-- pager 추가 -->
-				<div class="pager">
-					<ul>
-						<c:set var="loop" value="true"/>
-						<c:set var="left" value="true"/>
-						<c:set var="j" value="1"/>
-						<c:forEach  begin="${bStart}" end="${bEnd}" step="1" var="i" >
-						<c:if test="${loop}">
-						<c:set var="j" value="${j+1}"/>
-						<c:if test="${bStart != 1 && left}">
-							<li id="pre"><a href="<c:url value='/' />board/search?page=${bStart-1}&search-value=${searchValue}&kwd=${text}&start=${i-5}">◀ </a></li>
-							<c:set var="left" value="false"/>
-						</c:if>
-							<li id="${i}" class=""><a href="<c:url value='/' />board/search?page=${i}&search-value=${searchValue}&kwd=${text}&start=${bStart}">${i} </a></li>
-						<c:if test="${j==6&&j!=bEnd+1}">
-							<li id="next"><a href="<c:url value='/' />board/search?page=${i+1}&search-value=${searchValue}&kwd=${text}&start=${i+1}">▶</a></li>
-							<c:set var="loop" value="false"/>	
-						</c:if>
-						</c:if>
-						</c:forEach>
-					</ul>
-				</div>	
-				<!-- pager 추가 -->
-				
-				
-				</c:otherwise>
-				
-				</c:choose>	
-				<br/>
-					<script>
-				document.getElementById('${page}').className="selected";
-				</script>
-				
-				
-				<c:choose>
-					<c:when test="${not empty authuser}">
+				</div>				
 				<div class="bottom">
-					<a href="<c:url value='/' />board/write" id="new-book">글쓰기</a>
-				</div>		
-					</c:when>
-					<c:otherwise>
-						<h2>글쓰기는 로그인이 필요합니다</h2>
-					</c:otherwise>
-				</c:choose>		
+					<c:if test="${not empty authUser }">
+						<a href="${pageContext.request.contextPath }/board/write?p=${map.currentPage }&kwd=${map.keyword }" id="new-book">글쓰기</a>
+					</c:if>
+				</div>
 			</div>
 		</div>
 		<c:import url="/WEB-INF/views/includes/navigation.jsp">
 			<c:param name="menu" value="board"/>
 		</c:import>
-		<c:import url="/WEB-INF/views/includes/footer.jsp"/>
-		</div>
+		<c:import url="/WEB-INF/views/includes/footer.jsp" />
+	</div>
 </body>
 </html>

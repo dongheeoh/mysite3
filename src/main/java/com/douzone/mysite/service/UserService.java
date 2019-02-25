@@ -1,7 +1,6 @@
 package com.douzone.mysite.service;
 
 
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -12,31 +11,31 @@ import com.douzone.mysite.vo.UserVo;
 @Service
 public class UserService {
 	
-	@Autowired //주입해주라고
+
+	@Autowired
 	private UserDao userDao;
 	
-	public void join(UserVo userVo) {
-		//1.DB에 가입회원정보 insert하기
-			userDao.insert(userVo);	//익세셥안받음 컨트롤러로 올라감
-		//2.email 주소확인하는 메일보내기 이걸 서비스에넣어야하잔아 다오에넣을순없으니 서비스계층이 필요함	
+	public boolean existEmail( String email ) {
+		UserVo userVo = userDao.get( email );
+		return userVo != null;
 	}
 	
-	public UserVo login(UserVo userVo) {
-		return	userDao.get(userVo.getEmail(),userVo.getPassword());	//익세셥안받음 컨트롤러로 올라감		
+	public void join( UserVo userVo ) {
+		//1.DB에 사용정보 저장
+		userDao.insert( userVo );
+		
+		//2. 인증 메일 보내기
 	}
 	
-	public void logout(HttpSession session) {
-		UserVo authUser = (UserVo)session.getAttribute("authuser");
-		if(authUser != null){		
-			session.removeAttribute("authuser"); 
-			session.invalidate();
-		}
-	}	
+	public UserVo getUser( String email, String password ) {
+		return userDao.get( email, password );
+	}
 	
-	public UserVo modifyform(Long no) {
-		return userDao.get(no);
-	}	
-	public void modify(UserVo uservo) {
-		userDao.update(uservo);
-	}	
+	public UserVo getUser( Long no ) {
+		return userDao.get( no );
+	}
+	
+	public boolean modifyUser( UserVo userVo ) {
+		return userDao.update( userVo ) == 1;
+	}
 }
