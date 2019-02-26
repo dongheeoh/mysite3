@@ -7,7 +7,7 @@
 <title>Insert title here</title>
 </head>
 <body>
-	<h1>죄송합니다.</h1>
+	<h1>죄송합니다.-${uri }</h1>
 	<p>
 	<!--  
 		사용자 요청이 갑자기 많아져서<br>
@@ -22,7 +22,7 @@
 	</p>
 	
 	<p>
-		${errors };
+		${exception };
 	</p>
 	
 </body>

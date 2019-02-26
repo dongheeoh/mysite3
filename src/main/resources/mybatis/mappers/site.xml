@@ -3,7 +3,11 @@
 <mapper namespace="site">
 	<select id="getList" resultType="sitevo" parameterType="sitevo">
 		<![CDATA[
-		select * from site
+		select title, welcome, profile ,disc from site
 		]]>
 	</select>
+	
+	<update id="mainUpdate" parameterType="sitevo">
+		update site set title=#{title}, welcome=#{welcome}, disc=#{disc}
+	</update>
 </mapper>

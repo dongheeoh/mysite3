@@ -2,10 +2,10 @@ package com.douzone.mysite.controller;
 
 import java.util.Map;
 
-import javax.servlet.http.HttpSession;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -17,6 +17,7 @@ import com.douzone.mysite.service.BoardService;
 import com.douzone.mysite.util.WebUtil;
 import com.douzone.mysite.vo.BoardVo;
 import com.douzone.mysite.vo.UserVo;
+import com.douzone.security.AuthUser;
 
 
 @Controller
@@ -46,35 +47,19 @@ public class BoardController {
 	
 	@RequestMapping( "/delete/{no}" )
 	public String delete(
-		HttpSession session,
+		@AuthUser UserVo authUser,
 		@PathVariable( "no" ) Long boardNo,
 		@RequestParam( value="p", required=true, defaultValue="1") Integer page,
 		@RequestParam( value="kwd", required=true, defaultValue="") String keyword ) {
-
-		UserVo authUser = (UserVo)session.getAttribute("authUser");
-
-		/* 접근제어 */
-		if(null == authUser) {
-			return "redirect:/";
-		}
-		
 		boardService.deleteMessage( boardNo, authUser.getNo() );
 		return "redirect:/board?p=" + page + "&kwd=" + WebUtil.encodeURL( keyword, "UTF-8" );
 	}
 	
 	@RequestMapping( value="/modify/{no}" )	
 	public String modify(
-		HttpSession session,
+		@AuthUser UserVo authUser,
 		@PathVariable( "no" ) Long no,
-		Model model) {
-
-		UserVo authUser = (UserVo)session.getAttribute("authUser");
-
-		/* 접근제어 */
-		if(null == authUser) {
-			return "redirect:/";
-		}
-		
+		Model model) {		
 		BoardVo boardVo = boardService.getMessage(no, authUser.getNo() );
 		model.addAttribute( "boardVo", boardVo );
 		return "board/modify";
@@ -82,18 +67,10 @@ public class BoardController {
 
 	@RequestMapping( value="/modify", method=RequestMethod.POST )	
 	public String modify(
-		HttpSession session,
+		@AuthUser UserVo authUser,
 		@ModelAttribute BoardVo boardVo,
 		@RequestParam( value="p", required=true, defaultValue="1") Integer page,
-		@RequestParam( value="kwd", required=true, defaultValue="") String keyword ) {
-
-		UserVo authUser = (UserVo)session.getAttribute("authUser");
-
-		/* 접근제어 */
-		if(null == authUser) {
-			return "redirect:/";
-		}
-		
+		@RequestParam( value="kwd", required=true, defaultValue="") String keyword ) {		
 		boardVo.setUserNo( authUser.getNo() );
 		boardService.modifyMessage( boardVo );
 		return "redirect:/board/view/" + boardVo.getNo() + 
@@ -102,52 +79,36 @@ public class BoardController {
 	}
 	
 	@RequestMapping( value="/write", method=RequestMethod.GET )	
-	public String write(HttpSession session) {
-		/* 접근제어 */
-		if(null == session.getAttribute("authUser")) {
-			return "redirect:/";
-		}
-		
+	public String write(@AuthUser UserVo authUser) {
 		return "board/write";
 	}
-
+	
+	@Transactional //rollback
 	@RequestMapping( value="/write", method=RequestMethod.POST )	
 	public String write(
-		HttpSession session,
+		@AuthUser UserVo authUser,
 		@ModelAttribute BoardVo boardVo,
 		@RequestParam( value="p", required=true, defaultValue="1") Integer page,
 		@RequestParam( value="kwd", required=true, defaultValue="") String keyword ) {
-
-		UserVo authUser = (UserVo)session.getAttribute("authUser");
-
-		/* 접근제어 */
-		if(null == authUser) {
-			return "redirect:/";
-		}
 		
 		boardVo.setUserNo( authUser.getNo() );
 		
 		if( boardVo.getGroupNo() != null ) {
-			boardService.increaseGroupOrderNo( boardVo );
+			boardService.increaseGroupOrderNo( boardVo );// 다시 여기로 롤백
 		}
-		boardService.addMessage( boardVo );
+		boardService.addMessage( boardVo ); //이 지점 실패시
 		
 		return	( boardVo.getGroupNo() != null ) ?
 				"redirect:/board?p=" + page + "&kwd=" + WebUtil.encodeURL( keyword, "UTF-8" ) :
 				"redirect:/board";
 	}
 
-	@RequestMapping( value="/reply/{no}" )	
+	@RequestMapping(value="/reply/{no}")	
 	public String reply(
-		HttpSession session,
+		@AuthUser UserVo authUser,
 		@PathVariable( "no" ) Long no,
 		Model model) {
-
-		/* 접근제어 */
-		if(null == session.getAttribute("authUser")) {
-			return "redirect:/";
-		}
-
+		
 		BoardVo boardVo = boardService.getMessage( no );
 		boardVo.setOrderNo( boardVo.getOrderNo() + 1 );
 		boardVo.setDepth( boardVo.getDepth() + 1 );

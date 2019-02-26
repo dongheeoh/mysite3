@@ -19,6 +19,7 @@ public class UserDao {
 	private SqlSession sqlSession;
 	
 	public UserVo get( String email ) {
+		
 		return sqlSession.selectOne( "user.getByEmail", email );
 	}
 	

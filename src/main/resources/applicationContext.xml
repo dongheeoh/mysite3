@@ -12,10 +12,12 @@
         http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd
         http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task.xsd">
 
-	<context:annotation-config />
+	<!-- autoProxy -->
+	<aop:aspectj-autoproxy />
 
+	<context:annotation-config />
 	<context:component-scan
-		base-package="com.douzone.mysite.repository, com.douzone.mysite.service, com.douzone.mysite.exception">
+		base-package="com.douzone.mysite.repository, com.douzone.mysite.service, com.douzone.mysite.exception,come.douzone.mysite.aspect">
 		<context:include-filter type="annotation"
 			expression="org.springframework.stereotype.Repository" />
 		<context:include-filter type="annotation"

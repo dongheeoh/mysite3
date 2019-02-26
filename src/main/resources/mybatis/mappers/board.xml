@@ -10,7 +10,7 @@
 				  into bord
 				values ( null,
 						 #{title },
-						 #{content },
+						 #{contents },
 						 now(),
 						 0,
 						 ( select ifnull( max( g_no ), 0 ) + 1
@@ -26,7 +26,7 @@
 				  into bord
 				values ( null,
 						 #{title },
-						 #{content },
+						 #{contents },
 						 now(),
 						 0,
 						 #{groupNo },
@@ -42,7 +42,7 @@
 		<![CDATA[
 		update bord 
 		   set title=#{title },
-		       contents=#{content }
+		       contents=#{contents }
 		 where no=#{no }
 		   and user_no=#{userNo }		
 		]]>	

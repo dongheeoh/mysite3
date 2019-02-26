@@ -1,5 +1,7 @@
 package com.douzone.mysite.service;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -11,7 +13,11 @@ public class SiteService {
 	@Autowired
 	private SiteDao siteDao;
 	
-	public SiteVo getSite() {
+	public List<SiteVo> getSite() {
 		return siteDao.getSite();
+	}
+	
+	public void update(SiteVo siteVo) {
+		siteDao.mainUpdate(siteVo);
 	}
 }

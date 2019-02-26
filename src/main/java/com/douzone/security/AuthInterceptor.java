@@ -34,7 +34,7 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 		}
 		
 		//handlerMethod.getMethod().getDeclaredAnnotation();
-		//4. method에 @Auth가 안 붙어 있으면
+		//4. method와 type둘다 auth가 없다 @Auth가 안 붙어 있으면
 		if(auth==null) {
 			return true;
 		}
@@ -43,10 +43,11 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 		//5. @Auth 붙어 있기 때문에 로그인 여부(인증여부)를 확인해야한다.
 		HttpSession session= request.getSession();
 		UserVo authUser=null;
+		
 		if(session!=null) {
 			authUser=(UserVo)session.getAttribute("authUser");
 		}
-		
+		//없으면 가져와라고 login으로 보냄
 		if(authUser==null) {
 			response.sendRedirect(request.getContextPath()+"/user/login");
 			return false;
@@ -54,7 +55,15 @@ public class AuthInterceptor extends HandlerInterceptorAdapter {
 		
 		//5-1. Role 비교 작업
 		Role role= auth.value(); // role뺴오기
-	
+		System.out.println("role : " + role);
+		System.out.println("authUser.getRole() : " + authUser.getRole());
+		
+		if( String.valueOf(role).equals(authUser.getRole()) == false)
+		{
+			response.sendRedirect(request.getContextPath()+"/");
+			return false;
+		}
+		
 		//6. 접근허용
 		return true;
 	}

@@ -25,123 +25,26 @@
 					</tr>
 					<tr>
 						<td class="label">제목</td>
-						<td>${view.title } [글쓴이 : ${view.name}]</td>
+						<td>${boardVo.title } [글쓴이 : ${authUser.name}]</td>
 					</tr>
 					<tr>
 						<td class="label">내용</td>
 						<td>
 							<div class="view-content">
-								${view.contents }
+								${boardVo.contents }
 							</div>
 						</td>
 					</tr>
 				</table>
 				<div class="bottom">
-					<a href="${pageContext.servletContext.contextPath }/board/list">글목록</a>
-					<a href="${pageContext.servletContext.contextPath }/board/modifyform?no=${view.no}">글수정</a>
-					<a href="${pageContext.servletContext.contextPath }/board/replyform?no=${view.no}">답글달기</a>		
+					<a href="${pageContext.request.contextPath }/board?p=${param.p }&kwd=${param.kwd }">글목록</a>
+					<c:if test="${ not empty authUser }">
+						<a href="${pageContext.request.contextPath }/board/reply/${boardVo.no }?p=${param.p }&kwd=${param.kwd }">답글 달기</a>
+						<c:if test="${authUser.no == boardVo.userNo }">
+							<a href="${pageContext.request.contextPath }/board/modify/${boardVo.no }?p=${param.p }&kwd=${param.kwd }">글수정</a>
+						</c:if>
+					</c:if>	
 				</div>
-				
-				
-			<!-- 댓글보여주기 -->
-				<c:set var="count" value="0"/>		
-				<c:set var="commentcount" value="${fn:length(commentlist)}"/>
-				<hr>
-					<br/>
-					<strong>댓글(${commentcount }개)</strong>			
-				<c:forEach items="${commentlist}" var="vo" varStatus="status">
-				<hr>
-				  <ol>
-					<li>
-					
-						
-					
-						<table style="padding-left:${15*vo.depth}px">
-							<tr >
-								<td >
-									<c:if test="${vo.depth > 0}" >
-										<img src="${pageContext.servletContext.contextPath }/assets/images/reply.png">
-									</c:if>
-									[${ count = count+1 }] |
-								 </td>
-							<c:choose>
-								<c:when test="${ vo.userNo > 0 }">			 
-									<td style="color:red"><strong>${vo.name }</strong></td>
-								</c:when>
-								<c:otherwise>
-									<td>${vo.name }</td>
-								</c:otherwise>
-							</c:choose>	 			
-								<td> | ${vo.writeDate }</td>
-								<td><a href="${pageContext.servletContext.contextPath }/board/commentdeleteform?no=${vo.no}&viewno=${view.no}">삭제</a></td>
-								<td><a href="${pageContext.servletContext.contextPath }/board/commentmodifyform?no=${vo.no}&viewno=${view.no}">수정</a></td>
-								<td><a href="${pageContext.servletContext.contextPath }/board/commentreplyform?no=${vo.no}&viewno=${view.no}">대댓글</a></td>
-							</tr>
-							<tr>
-								<td colspan=4>
-								${fn:replace(vo.contents,  newline, "<br>") }
-								</td>
-							</tr>
-						</table>
-									
-						<br>
-					</li>
-				  </ol>
-				</c:forEach>
-			<!--  -->
-				
-			<!-- 댓글폼 로그인 유무에따라 -->
-				<c:choose>
-					<c:when test="${ empty authuser }">
-						<form class="board-form" method="post" action="${pageContext.servletContext.contextPath }/board">
-							<input type = "hidden" name = "a" value="comment">
-							<input type = "hidden" name = "no" value="${param.no}">
-							<input type = "hidden" name = "kwd" value="${param.kwd}">
-							
-							<table class="tbl-ex">
-								
-								<tr>
-									<td>닉네임 : <input type="text" name="name" value=""></td>
-								</tr>
-								<tr>
-									<td>비밀번호 :<input type="password" name="password" value=""></td>
-								</tr>
-								
-								<tr>
-									<td>
-										<textarea id="content" name="contents"></textarea>
-									</td>
-								</tr>
-								
-							</table>
-							<input type="submit" value="댓글달기">
-						</form>
-					</c:when>
-					
-					<c:otherwise>
-						<form class="board-form" method="post" action="${pageContext.servletContext.contextPath }/board">
-							<input type = "hidden" name = "a" value="comment">
-							<input type = "hidden" name = "no" value="${view.no}">
-							
-							<table class="tbl-ex">
-								
-								<tr>
-									<td>닉네임 : ${authuser.name }</td>
-								</tr>			
-								<tr>
-									<td>
-										<textarea id="content" name="contents"></textarea>
-									</td>
-								</tr>
-								
-							</table>
-							<input type="submit" value="댓글달기">
-						</form>
-					</c:otherwise>
-					
-				</c:choose>
-			<!-- 댓글폼 -->
-				
 			</div>
 		</div>
 		

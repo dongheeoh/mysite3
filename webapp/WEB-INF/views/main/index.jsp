@@ -5,7 +5,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>mysite</title>
+<title>${site.title}</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8">
 <link href="${pageContext.servletContext.contextPath }/assets/css/main.css" rel="stylesheet" type="text/css">
 </head>
@@ -15,7 +15,7 @@
 		<div id="wrapper">
 			<div id="content">
 				<div id="site-introduction">
-					<img id="profile" src="${pageContext.servletContext.contextPath }/assets/images/profile.png" style="width:200px">
+					<img id="profile" src="${pageContext.request.contextPath }/${site.profile}" style="width:200px">
 					<h2>${site.welcome}</h2>
 					<p>
 						${site.disc}
