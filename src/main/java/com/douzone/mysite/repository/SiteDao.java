@@ -1,6 +1,5 @@
 package com.douzone.mysite.repository;
 
-import java.util.List;
 
 import org.apache.ibatis.session.SqlSession;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,8 +13,9 @@ public class SiteDao {
 	@Autowired
 	private SqlSession sqlSession;
 	
-	public List<SiteVo> getSite(){
-		return sqlSession.selectList("site.getList");
+	public SiteVo getSite(){
+		return sqlSession.selectOne("site.getList");
+		
 	}
 	
 	public int mainUpdate(SiteVo siteVo) {

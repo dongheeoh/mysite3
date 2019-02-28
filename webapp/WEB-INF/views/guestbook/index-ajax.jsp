@@ -136,6 +136,7 @@ var pushPost = function(){
 				return;
 			}			
 			//rendering
+			$( "#add-form" )[0].reset();
 			render(response.data, true);
 			
 		},

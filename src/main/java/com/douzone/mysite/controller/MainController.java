@@ -1,6 +1,5 @@
 package com.douzone.mysite.controller;
 
-import java.util.List;
 
 import javax.servlet.http.HttpSession;
 
@@ -24,9 +23,9 @@ public class MainController {
 	@RequestMapping({"","/main"})
 	public String main(Model model, HttpSession session) {
 		//return "/WEB-INF/views/main/index.jsp";
-		List<SiteVo> siteVo=siteService.getSite();
-		model.addAttribute("site",siteVo.get(0));
-		session.setAttribute("siteTitle", siteVo.get(0).getTitle());
+		SiteVo siteVo=siteService.getSite();
+		model.addAttribute("site",siteVo);
+		session.setAttribute("siteTitle", siteVo.getTitle());
 		return "/main/index";
 	}
 	

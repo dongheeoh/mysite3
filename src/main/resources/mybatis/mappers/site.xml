@@ -8,6 +8,6 @@
 	</select>
 	
 	<update id="mainUpdate" parameterType="sitevo">
-		update site set title=#{title}, welcome=#{welcome}, disc=#{disc}
+		update site set title=#{title}, welcome=#{welcome}, profile=#{profile} ,disc=#{disc}
 	</update>
 </mapper>
