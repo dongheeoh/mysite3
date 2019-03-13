@@ -18,7 +18,7 @@
 					<img id="profile" onerror="this.src='${pageContext.request.contextPath }/assets/images/default.png'" src="${pageContext.request.contextPath }${site.profile}" style="width:200px">
 					<h2>${site.welcome}</h2>
 					<p>
-						${site.disc}
+						${site.disc}ps 
 						<a href="${pageContext.servletContext.contextPath }/guestbook/list">방명록</a>에 글 남기기<br>
 					</p>
 				</div>
